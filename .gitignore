@@ -1,0 +1,28 @@
+# Generated mods, archives, proprietary reference sources and local builds
+/build/
+/reference/
+/smoke-server/
+/dist/
+*.zip
+*.dll
+*.exe
+*.log
+*.jsonl
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Server credentials, identities and player progress
+/Resources/
+/RLSMP-backups/
+ServerConfig.toml
+config.json
+.env
+.env.*
+/settings/
+/saves/
+
+# Local editor state
+.vscode/
+.idea/
+.DS_Store

@@ -1,0 +1,21 @@
+name: Source checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check Python and JSON sources
+        run: python3 tools/check-source.py
+      - name: Install Lua 5.3 compiler
+        run: sudo apt-get update && sudo apt-get install -y lua5.3
+      - name: Check bridge Lua syntax
+        shell: bash
+        run: find src -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p

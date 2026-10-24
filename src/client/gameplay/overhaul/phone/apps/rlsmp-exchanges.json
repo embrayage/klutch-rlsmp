@@ -1,0 +1,11 @@
+{
+  "id": "rlsmp-exchanges",
+  "name": "Player Exchange",
+  "description": "Browse the player car marketplace, publish lasting listings and send money to other players.",
+  "component": "/ui/ui-vue/mods/rlsmp_teamx/PlayerExchanges.vue",
+  "icon": ["group", "dataExchange", "beamCurrency"],
+  "color": "#287e79",
+  "systemApp": true,
+  "defaultHome": {"slot": 15, "required": true},
+  "unlock": {"type": "lua", "extension": "rlsmpTeamx", "function": "isTradingAvailable"}
+}

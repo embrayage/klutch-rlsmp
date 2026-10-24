@@ -1,0 +1,22 @@
+name: Bug report
+description: Report an RLSMP issue
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: RLSMP, RLS, BeamNG and BeamMP versions.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: What happened, what you expected, and whether it happens after reconnecting.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Remove server keys, account IDs, IP addresses and personal save contents.
