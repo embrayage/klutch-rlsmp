@@ -1,7 +1,7 @@
 -- RLSMP TeamX: server identity and transaction coordinator. Careers remain local.
 local ROOT = 'Resources/Server/rlsmpTeamx/'
 local PROTOCOL = 1
-local VERSION = '0.8.0-alpha'
+local VERSION = '0.8.1-alpha'
 local config
 local helloAt = {}
 local exchange

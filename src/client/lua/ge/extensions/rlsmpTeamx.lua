@@ -14,7 +14,7 @@ local hooks = {}
 -- Keep the engine implementation: BeamMP's replaceRequest discards otherVeh.
 local nativeReplaceVehicle = core_vehicles and core_vehicles.replaceVehicle
 local eventRegistered, registeredEventApi = false, nil
-local VERSION = '0.8.0-alpha'
+local VERSION = '0.8.1-alpha'
 local selectedProfile
 local nativePickerOpened = false
 local mapHook, mapRequestPending

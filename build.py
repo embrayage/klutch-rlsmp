@@ -20,7 +20,8 @@ PATCH_TARGETS = {
         'career/garage/inventory/spawn.lua', 'career/market/auction/consignment.lua')),
     *('ui/ui-vue/mods/rls_career_overhaul/overhaul/modules/career/' + suffix for suffix in (
         'profiles/views/ProfileSelect.vue',
-        'profiles/components/start/useStartMaps.js', 'utils/installLuaBridgeFallbacks.js')),
+        'profiles/components/start/useStartMaps.js', 'utils/installLuaBridgeFallbacks.js',
+        'utils/runtimeComponent.js')),
 }
 
 
@@ -41,7 +42,7 @@ def patched(name, raw):
         text = edit(name, text, old, new)
 
     if name == 'scripts/rls_career_overhaul/modScript.lua':
-        text = ('-- RLSMP TeamX 0.8.0-alpha\n'
+        text = ('-- RLSMP TeamX 0.8.1-alpha\n'
                 'setExtensionUnloadMode("rlsmpTeamx", "manual")\n'
                 'extensions.load("rlsmpTeamx")\n\n') + text
     elif name.endswith('/shell/extensionManager.lua'):
@@ -244,6 +245,36 @@ onMounted(() => {
                '''  if (isAnyModalOpen()) return
   if (rlsmpContext.value?.active) { await lua.rlsmpTeamx.closeProfiles(); return }
   let active = !!activeProfileId.value''')
+    elif name.endswith('/career/utils/runtimeComponent.js'):
+        change("shallowRef, h, onUnmounted } from 'vue'", "shallowRef, h, onUnmounted, nextTick } from 'vue'")
+        change("import { reportUiFailure } from './safeLua'",
+               "import { reportUiFailure } from './safeLua'\nimport { useRouteReady } from '@/services/routeReadiness'")
+        change('function pendingScreen(file, firstLoad, { phone = true, preload = firstLoad } = {}) {',
+               'function pendingScreen(file, firstLoad, { phone = true, preload = firstLoad, profile = false } = {}) {')
+        change("    name: phone ? 'PhonePendingScreen' : 'RoutePendingScreen',",
+               "    name: profile ? 'RLSMPProfilePendingScreen' : phone ? 'PhonePendingScreen' : 'RoutePendingScreen',")
+        change('    setup(_, { attrs }) {\n      const component = shallowRef(loaded)',
+               '    setup(_, { attrs }) {\n'
+               '      // The profile route declares handlesOwnReady; its visible loader must acknowledge readiness too.\n'
+               '      if (profile) useRouteReady({ waitUntilReady: () => nextTick() })\n'
+               '      const component = shallowRef(loaded)')
+        change("        if (!phone) return h('div')", "        if (!phone && !profile) return h('div')")
+        change('    const prepare = async () => {',
+               "    const profile = file.endsWith('/profiles/views/ProfileSelect.vue')\n    const prepare = async () => {")
+        change('        return await boundedLoad(file)',
+               """        const pending = boundedLoad(file)
+        if (!profile) return await pending
+        // BeamNG cancels routeCommit after 3 s; a cold profile graph can take much longer.
+        let timer
+        try {
+          const outcome = await Promise.race([
+            pending.then(component => ({ component }), () => ({})),
+            new Promise(resolve => { timer = setTimeout(() => resolve({}), 300) }),
+          ])
+          return outcome.component || pendingScreen(file, pending, { phone, profile: true })
+        } finally { clearTimeout(timer) }""")
+        change('        return pendingScreen(file, null, { phone })',
+               '        return pendingScreen(file, null, { phone, profile })')
     elif name.endswith('/profiles/components/start/useStartMaps.js'):
         change('  pending = request.then(reply => {\n    const validated = validateCatalog(reply)',
                '''  pending = request.then(async reply => {
@@ -273,10 +304,10 @@ def build(source, output):
     config_file = server_dir / 'config.json'
     config = json.loads(config_file.read_text()) if config_file.exists() else {
         'serverId': uuid.uuid4().hex, 'level': 'rls_west_coast', 'storage': 'local',
-        'version': '0.8.0-alpha', 'automaticTraffic': False,
+        'version': '0.8.1-alpha', 'automaticTraffic': False,
     }
     config['level'] = 'rls_west_coast'
-    config['version'] = '0.8.0-alpha'
+    config['version'] = '0.8.1-alpha'
     config_file.write_text(json.dumps(config, indent=2) + '\n', encoding='utf-8')
     for path in (ROOT / 'src/server').glob('*.lua'):
         (server_dir / path.name).write_bytes(path.read_bytes())
@@ -300,8 +331,8 @@ def build(source, output):
             if path.is_file():
                 dst.write(path, path.relative_to(ROOT / 'src/client').as_posix())
     if set(PATCHES) != PATCH_TARGETS:
-        raise ValueError(f'Expected 16 patched RLS files, got {len(PATCHES)}')
-    manifest = {'version': '0.8.0-alpha', 'source': str(source),
+        raise ValueError(f'Expected 17 patched RLS files, got {len(PATCHES)}')
+    manifest = {'version': '0.8.1-alpha', 'source': str(source),
                 'upstreamVersion': upstream_version['version_string'].strip(),
                 'upstreamSourceSha': upstream_version['source_sha'],
                 'sourceSha256': hashlib.file_digest(source.open('rb'), 'sha256').hexdigest(),
@@ -309,13 +340,15 @@ def build(source, output):
                 'serverId': config['serverId'], 'patchedFiles': PATCHES}
     manifest['serverFiles'] = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
                                for path in server_dir.glob('*.lua')}
-    update = output / 'RLSMP-0.8.0-update.zip'
+    update = output / 'RLSMP-0.8.1-update.zip'
     with zipfile.ZipFile(update, 'w', compression=zipfile.ZIP_STORED) as bundle:
         bundle.write(target, target.relative_to(output).as_posix())
         for path in sorted(server_dir.glob('*.lua')):
             bundle.write(path, path.relative_to(output).as_posix())
         bundle.writestr('UPDATE.txt',
-            'RLSMP 0.8.0 - RLS 2.8.0 Final Release Compatibility / Career Selector / Marketplace\n\n'
+            'RLSMP 0.8.1 - Career Selector Cold-Load Recovery\n\n'
+            'A visible profile loader now commits before the native route deadline and acknowledges mount readiness.\n'
+            'Failed profile imports show a retry button. Other native routes keep their normal loading behavior.\n\n'
             'Stop the server and back up the existing RLSMP files and journals.\n'
             'Extract this update into the server root, replacing the client ZIP and all three server Lua files.\n'
             'KEEP your existing Resources/Server/rlsmpTeamx/config.json and trades.jsonl unchanged.\n'

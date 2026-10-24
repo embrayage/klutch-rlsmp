@@ -1,4 +1,4 @@
-# Klutch RLSMP 0.8.0-alpha
+# Klutch RLSMP 0.8.1-alpha
 
 RLS Career Overhaul 2.8.0 final release / BeamNG 0.40 / BeamMP Server 3.9.3 bridge. Each account uses its own local career profiles for this server. Players share the map and three synchronized civilian AI vehicles per active career.
 
@@ -27,7 +27,7 @@ Limits: 10 pending/active listings per account and 200 on the server. Prices and
 
 ## Install or update a remote server
 
-The portable **RLSMP-0.8.0-update.zip** contains both required sides:
+The portable **RLSMP-0.8.1-update.zip** contains both required sides:
 
 ```
 Resources/Client/rls_career_overhaul_rlsmp_teamx.zip
@@ -40,7 +40,7 @@ Resources/Server/rlsmpTeamx/tradeWire.lua
 2. Extract the update into the server root, replacing those four files. Keep the existing `Resources/Server/rlsmpTeamx/config.json` and `trades.jsonl`. They are deliberately absent from the update package.
 3. Start the server. Fully close BeamNG on every PC, then reconnect so both Lua and the phone UI load the new client.
 
-Updating only the client ZIP does not install the marketplace coordinator. The update requires the server folder too. The server ID in `config.json` must remain unchanged; it selects the namespace of each player's local careers. New clients are required to publish or buy marketplace listings. Old transaction records remain readable by 0.8.0.
+Updating only the client ZIP does not install the marketplace coordinator. The update requires the server folder too. The server ID in `config.json` must remain unchanged; it selects the namespace of each player's local careers. New clients are required to publish or buy marketplace listings. Old transaction records remain readable by 0.8.1.
 
 For this local server, the checked installer is:
 
@@ -68,7 +68,7 @@ Withdraw listings and finish transactions before duplicating or importing a care
 
 - No Auth+ dependency. A signed-in BeamMP account supplies the permanent profile identity.
 - Only the patched RLS archive is distributed. Installers move conflicting RLS providers into hash-checked backups rather than deleting them.
-- The career selector reopens after BeamMP's world-ready navigation and retries lost routes. RLS 2.8.0 now natively awaits all route components before committing navigation; the former RLSMP route override is removed. Slow loads retain the previous screen until the component is ready. Native timeout recovery and phone loading screens are preserved.
+- The career selector reopens after BeamMP's world-ready navigation and retries lost routes. The RLS route tree stays native. Only the career picker gets a visible loading/retry presentation after 300 ms, within BeamNG's 3-second commit budget. That presentation uses the game's actual route-readiness composable because the picker declares handlesOwnReady. Late imports render inside the same mounted presentation; failed imports offer retry. Other route/host/phone loading and native navigation guards remain unchanged.
 - Explicit parts-shop vehicle replacements retain the original vehicle ID. Foreign vehicles, stale objects and ambient traffic are excluded from inventory management.
 - The saved live-fleet list takes precedence over stale garage positions, preventing stored cars from reappearing on join.
 - Global audio is restored once after RLS confirms activation of the selected career. Recovery waits for the loading manager, native loading requests and black-screen fade to finish, the play route to be active, physics to be unpaused, and the local player's vehicle Lua to acknowledge readiness. It then waits one stable second and clears the native loading/pause audio flags and UI audio blur. This works while walking as well as driving. The 0.6.2 vehicle-source rebuild is removed. Volumes, sound banks, vehicle state and simulation speed are preserved. The bridge's `getStatus().audio` and `rlsmpTeamx.audio` log messages expose progress. Profile changes and disconnects cancel pending recovery; later missions, menus and pauses keep their normal audio behavior.
@@ -83,7 +83,7 @@ python .\build.py --source "PATH_TO_RLS_ZIP"
 python .\tests\run_tests.py
 ```
 
-The builder validates 16 original RLS patch targets: 13 Lua and three UI files. It bundles nine GE bridge modules, one vehicle module, the phone manifest/component and three server scripts. The original RLS ZIP and base game files are not changed.
+The builder validates 17 original RLS patch targets: 13 Lua and four UI files. It bundles nine GE bridge modules, one vehicle module, the phone manifest/component and three server scripts. The original RLS ZIP and base game files are not changed.
 
 Tests cover native APIs and vehicle locks, career/profile isolation, imports, startup retries, traffic, explicit vehicle replacement, stored fleet restoration, pause/network guards, the actual game's icon catalog, Vue compilation and UI actions. Multi-client marketplace tests cover durable publication, no expiry, disconnect/restart persistence, offline sellers, simultaneous buyers, exact parts/condition transfer, one-time seller credit, ownership/profile checks, interrupted withdrawals, insufficient funds/space, failed saves and legacy transaction recovery.
 

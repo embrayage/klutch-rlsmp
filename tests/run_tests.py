@@ -54,6 +54,9 @@ for file in syntax_files:
 print(f'PASS: Lua syntax ({len(syntax_files)} files)')
 
 game_lua = GAME / 'lua'
+run(f'package.path = {literal(game_lua / "?.lua")} .. ";" .. package.path\n' +
+    f'GAME_LUA = {literal(game_lua)}\n' +
+    (ROOT / 'tests/router_deadlines.lua').read_text(), 'native route transition deadlines')
 run(f'package.path = {literal(ROOT / "src/client/lua/ge/extensions/?.lua")} .. ";" .. package.path\n' +
     f'GAME_LUA = {literal(game_lua)}\n' +
     (ROOT / 'tests/audio_recovery.lua').read_text(encoding='utf-8'), 'global audio after career load')
@@ -109,7 +112,7 @@ assert(replies[1].data.profile == 'beammp_12345')
 assert(replies[2].data.profile == 'beammp_67890')
 assert(replies[1].data.serverId == replies[2].data.serverId)
 assert(replies[1].data.level == 'rls_west_coast')
-assert(replies[1].data.version == '0.8.0-alpha')
+assert(replies[1].data.version == '0.8.1-alpha')
 assert(replies[1].id == 1 and replies[2].id == 2)
 rlsmpTeamx_Hello(3, 'HELLO')
 assert(replies[3].data.error and not replies[3].data.profile)
@@ -260,5 +263,6 @@ assert(not setProfile('offline_name','../escape'))
 print('PASS: actual setProfile preserves the permanent MP profile name and retains solo name normalization')
 subprocess.run(['node', str(ROOT / 'tests/check_native_ui.cjs')], check=True)
 subprocess.run(['node', str(ROOT / 'tests/check_profile_route.cjs')], check=True)
+subprocess.run(['node', str(ROOT / 'tests/check_profile_startup.cjs')], check=True)
 subprocess.run(['node', str(ROOT / 'tests/check_trade_ui.cjs')], check=True)
 print('All automated checks passed. Two-player in-game validation is still required.')

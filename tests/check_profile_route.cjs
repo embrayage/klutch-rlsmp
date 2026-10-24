@@ -39,7 +39,7 @@ assert(nativeRoutes.some(route => route.component?.kind === 'host-loader'))
     clearTimeout:id => timers.delete(id), routeProps:new Proxy({}, {get:() => () => {}}),
     window:{__rtModules:{},__bngRuntime:{resolve:(_,file) => file,invalidate:file => invalidated.push(file)}}}
   vm.createContext(context)
-  vm.runInContext(plain(read('reference/rls', 'runtimeComponent.js')) + '\n' + plain(routeSource), context)
+  vm.runInContext(plain(read('build/patched-lua', 'runtimeComponent.js')) + '\n' + plain(routeSource), context)
   const route = flatten(context.buildCoreRoutes()).find(route => route.name === pickerDescription.name)
   assert.equal(typeof route.component, 'function')
   assert.equal(typeof context.runtimeComponent(picker), 'object') // overlays retain their async wrappers

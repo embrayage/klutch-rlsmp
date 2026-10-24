@@ -16,7 +16,7 @@ const read = file => fs.readFileSync(manifest.patchedFiles[relativeBase + file]
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'rlsmp-ui-check-'))
 try {
   for (const file of ['profiles/views/ProfileSelect.vue', 'stores/profilesStore.js',
-      'profiles/components/start/useStartMaps.js', 'utils/installLuaBridgeFallbacks.js', 'utils/coreUiRoutes.js']) {
+      'profiles/components/start/useStartMaps.js', 'utils/installLuaBridgeFallbacks.js', 'utils/coreUiRoutes.js', 'utils/runtimeComponent.js']) {
     const source = read(file)
     const script = file.endsWith('.vue') ? source.match(/<script setup>([\s\S]*?)<\/script>/)[1] : source
     const target = path.join(temp, path.basename(file) + '.mjs')
@@ -37,7 +37,7 @@ const template = profile.match(/<template>([\s\S]*?)<\/template>\s*<script/)[1]
 const errors = []
 vue.Vue.compile(template, {decodeEntities:raw=>raw, onError:error=>errors.push(error.message)})
 assert.deepEqual(errors, [])
-console.log('PASS: five native UI scripts parsed and profile template compiled with the installed Vue compiler')
+console.log('PASS: six native UI scripts parsed and profile template compiled with the installed Vue compiler')
 
 // Exercise the actual fallback installer: an undeclared namespace otherwise silently hides the MP imports.
 const fallbackSource = read('utils/installLuaBridgeFallbacks.js')
