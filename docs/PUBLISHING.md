@@ -16,3 +16,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .	oolspublish-github.ps1
 The helper uses the currently signed-in personal GitHub account, creates the initial commit when needed and publishes `OWNER/klutch-rlsmp`. It refuses an existing remote or repository so that it cannot overwrite unrelated work. It uses the account's GitHub noreply address if no local Git email is configured.
 
 Only source, tests, documentation and project tooling are staged. Do not upload `build/`, `reference/`, server configuration, journals, saves or the original RLS archive.
+
+## Release assets
+
+After building and testing, package verified assets from the exact source commit:
+
+```powershell
+python .\tools\package-release.py --commit FULL_SOURCE_COMMIT_SHA
+```
+
+Publish the two archives and `SHA256SUMS.txt` from `build/release/`. Exclude the private build manifest and `release-results.json`. The installation helper generates a fresh ID for a new server and preserves existing configuration. An orphan journal blocks initialization. Update archives contain neither configuration nor journal. Mark alpha versions as GitHub pre-releases and document remaining in-game checks.

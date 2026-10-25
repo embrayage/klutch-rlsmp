@@ -19,3 +19,13 @@ jobs:
       - name: Check bridge Lua syntax
         shell: bash
         run: find src -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+
+  server-setup:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check unique identities and configuration preservation
+        shell: pwsh
+        run: ./tests/configure_server.ps1

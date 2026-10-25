@@ -19,6 +19,22 @@ The career selector has a visible loading/retry presentation for slow first load
 
 Read [the feature and behavior guide](docs/FEATURES.md) for transaction recovery and known limits.
 
+## Downloads
+
+Download the versioned assets from [GitHub Releases](https://github.com/embrayage/klutch-rlsmp/releases).
+
+- `RLSMP-0.8.1-server-install.zip`: new installation, including the patched client, server scripts and unique-identity setup helper.
+- `RLSMP-0.8.1-update.zip`: existing server; keep its `config.json` and `trades.jsonl`.
+- `SHA256SUMS.txt`: SHA-256 checksums for both archives.
+
+GitHub's automatically generated **Source code** archives contain development sources, not a ready-to-install mod. For a new Windows server, extract the installation package into its root and run:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\Configure-RLSMP.ps1 -ServerRoot .
+```
+
+This generates a distinct ID for each new server and preserves existing configuration. Manual/Linux instructions are in `INSTALL.txt`.
+
 ## Build
 
 The repository contains the bridge source, patch builder and tests. Obtain the original RLS release separately from [Raceless-RLS](https://www.patreon.com/RacelessRLS/posts/rls-career-v2-8-173221696).
